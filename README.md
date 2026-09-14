@@ -14,14 +14,18 @@
 Используемые технологии: Python, ООП, dataclasses, type hints.
 
 Структура проекта:
+
+```text
 Task_manager/
 ├── main.py
 ├── README.md
 └── .gitignore
-
+```
 Инструкция по запуску:
-python main.py
 
+```bash
+python main.py
+```
 Планы развития:
 
 1. Добавить хранение данных в БД
