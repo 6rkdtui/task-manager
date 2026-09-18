@@ -11,7 +11,7 @@ def get_id() -> int:
 
 
 if __name__ == "__main__":
-    manager = TaskManager()
+    manager = TaskManager("task_manager.db")
 
     while True:
         print("""
@@ -34,6 +34,7 @@ if __name__ == "__main__":
 
         match option_input:
             case 0:
+                manager.close()
                 break
 
             case 1:
@@ -66,12 +67,12 @@ if __name__ == "__main__":
                     print("Задача под данным номером отсутствует")
                 else:
                     new_title = input(
-                        "Введите новое название или нажмите Enter, чтобы оставить без изменений"
+                        "Введите новое название или нажмите Enter, чтобы оставить без изменений: "
                     )
                     new_title = None if new_title == "" else new_title
 
                     new_description = input(
-                        "Введите новое описание или нажмите Enter, чтобы оставить без изменений"
+                        "Введите новое описание или нажмите Enter, чтобы оставить без изменений: "
                     )
                     new_description = None if new_description == "" else new_description
 
