@@ -1,52 +1,101 @@
 from task_manager import TaskManager
 
-manager = TaskManager()
 
-while True:
-    option_input = int(input("Выберите нужную опцию ..."))
+def get_id() -> int:
+    while True:
+        try:
+            task_id = int(input("Введите номер задачи: "))
+            return task_id
+        except ValueError:
+            print("Вы ввели не число")
 
-    match option_input:
-        case 0:
-            break
 
-        case 1:
-            title = input("Введите назавание задачи ")
-            description = input("Введите описание задачи ")
-            task = manager.add_task(title, description)
-            print(task)
+if __name__ == "__main__":
+    manager = TaskManager()
 
-        case 2:
-            tasks = manager.get_all_tasks()
-            if not tasks:
-                print("Задач пока нет")
-            else:
-                for task in tasks:
+    while True:
+        print("""
+            Выберите действие:
+
+            1 — Добавить задачу
+            2 — Показать все задачи
+            3 — Показать задачу по ID
+            4 — Изменить задачу
+            5 — Отметить задачу выполненной
+            6 — Удалить задачу
+            0 — Выйти
+        """)
+
+        try:
+            option_input = int(input("Выберите нужную опцию: "))
+        except ValueError:
+            print("Нужно ввести число")
+            continue
+
+        match option_input:
+            case 0:
+                break
+
+            case 1:
+                title = input("Введите название задачи: ")
+                description = input("Введите описание задачи: ")
+                task = manager.add_task(title, description)
+                print(task)
+
+            case 2:
+                tasks = manager.get_all_tasks()
+                if not tasks:
+                    print("Задач пока нет")
+                else:
+                    for task in tasks:
+                        print(task)
+
+            case 3:
+                task_id = get_id()
+
+                task = manager.get_task(task_id)
+                if task is None:
+                    print("Задача под данным номером отсутствует")
+                else:
                     print(task)
 
+            case 4:
+                task_id = get_id()
+                existing_task = manager.get_task(task_id)
+                if existing_task is None:
+                    print("Задача под данным номером отсутствует")
+                else:
+                    new_title = input(
+                        "Введите новое название или нажмите Enter, чтобы оставить без изменений"
+                    )
+                    new_title = None if new_title == "" else new_title
 
-# if __name__ == "__main__":
-#     manager = TaskManager()
-#     task1 = manager.add_task("Изучить ООП", "Закончить курс по ООП")
-#     task2 = manager.add_task("Изучить Docker", "Пройти базовый курс")
+                    new_description = input(
+                        "Введите новое описание или нажмите Enter, чтобы оставить без изменений"
+                    )
+                    new_description = None if new_description == "" else new_description
 
-#     print("После добавления:")
-#     print(manager.get_all_tasks())
+                    updated_task = manager.update_task(
+                        task_id, new_title, new_description
+                    )
 
-#     print("\nПолучение задачи с id=1:")
-#     print(manager.get_task(1))
+                    print(updated_task)
 
-#     print("\nНесуществующая задача:")
-#     print(manager.get_task(100))
+            case 5:
+                task_id = get_id()
+                completed_task = manager.complete_task(task_id)
+                if completed_task is None:
+                    print("Задача под данным номером отсутствует")
+                else:
+                    print(completed_task)
 
-#     print("\nПосле изменения:")
-#     manager.update_task(1, title="Повторить ООП")
-#     print(manager.get_task(1))
+            case 6:
+                task_id = get_id()
+                deleted_task = manager.delete_task(task_id)
+                if deleted_task is None:
+                    print("Задача под данным номером отсутствует")
+                else:
+                    print(f"Задача удалена: {deleted_task}")
 
-#     print("\nПосле complete_task:")
-#     manager.complete_task(1)
-#     print(manager.get_task(1))
-
-#     print("\nУдаляем задачу 2:")
-#     deleted_task = manager.delete_task(2)
-#     print("Удалена:", deleted_task)
-#     print(manager.get_all_tasks())
+            case _:
+                print("Такая команда отсутствует")
