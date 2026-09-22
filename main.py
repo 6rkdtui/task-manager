@@ -1,4 +1,5 @@
-from task_manager import TaskManager
+from task_repository import TaskRepository
+from task_service import TaskService
 
 
 def get_id() -> int:
@@ -11,7 +12,8 @@ def get_id() -> int:
 
 
 if __name__ == "__main__":
-    manager = TaskManager("task_manager.db")
+    repository = TaskRepository("task_manager.db")
+    service = TaskService(repository)
 
     while True:
         print("""
@@ -34,17 +36,17 @@ if __name__ == "__main__":
 
         match option_input:
             case 0:
-                manager.close()
+                service.close()
                 break
 
             case 1:
                 title = input("Введите название задачи: ")
                 description = input("Введите описание задачи: ")
-                task = manager.add_task(title, description)
+                task = service.add_task(title, description)
                 print(task)
 
             case 2:
-                tasks = manager.get_all_tasks()
+                tasks = service.get_all_tasks()
                 if not tasks:
                     print("Задач пока нет")
                 else:
@@ -54,7 +56,7 @@ if __name__ == "__main__":
             case 3:
                 task_id = get_id()
 
-                task = manager.get_task(task_id)
+                task = service.get_task(task_id)
                 if task is None:
                     print("Задача под данным номером отсутствует")
                 else:
@@ -62,7 +64,7 @@ if __name__ == "__main__":
 
             case 4:
                 task_id = get_id()
-                existing_task = manager.get_task(task_id)
+                existing_task = service.get_task(task_id)
                 if existing_task is None:
                     print("Задача под данным номером отсутствует")
                 else:
@@ -76,7 +78,7 @@ if __name__ == "__main__":
                     )
                     new_description = None if new_description == "" else new_description
 
-                    updated_task = manager.update_task(
+                    updated_task = service.update_task(
                         task_id, new_title, new_description
                     )
 
@@ -84,7 +86,7 @@ if __name__ == "__main__":
 
             case 5:
                 task_id = get_id()
-                completed_task = manager.complete_task(task_id)
+                completed_task = service.complete_task(task_id)
                 if completed_task is None:
                     print("Задача под данным номером отсутствует")
                 else:
@@ -92,7 +94,7 @@ if __name__ == "__main__":
 
             case 6:
                 task_id = get_id()
-                deleted_task = manager.delete_task(task_id)
+                deleted_task = service.delete_task(task_id)
                 if deleted_task is None:
                     print("Задача под данным номером отсутствует")
                 else:

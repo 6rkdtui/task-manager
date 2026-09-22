@@ -2,7 +2,8 @@ import sqlite3
 from task import Task
 
 
-class TaskManager:
+class TaskRepository:
+    
     def __init__(self, db_name: str) -> None:
         self.db_name = db_name
         self.connection = sqlite3.connect(self.db_name)
@@ -25,6 +26,19 @@ class TaskManager:
     def close(self) -> None:
         self.connection.close()
 
+    def get_task(self, task_id: int) -> Task | None:
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "SELECT id, title, description, is_completed FROM tasks WHERE id = ?",
+            (task_id,),
+        )
+        task = cursor.fetchone()
+        cursor.close()
+        if task is None:
+            return None
+
+        return Task(task[0], task[1], task[2], bool(task[3]))
+
     def add_task(self, title: str, description: str) -> Task:
         cursor = self.connection.cursor()
 
@@ -44,19 +58,6 @@ class TaskManager:
             return task
         finally:
             cursor.close()
-
-    def get_task(self, task_id: int) -> Task | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            "SELECT id, title, description, is_completed FROM tasks WHERE id = ?",
-            (task_id,),
-        )
-        task = cursor.fetchone()
-        cursor.close()
-        if task is None:
-            return None
-
-        return Task(task[0], task[1], task[2], bool(task[3]))
 
     def get_all_tasks(self) -> list[Task]:
         cursor = self.connection.cursor()
