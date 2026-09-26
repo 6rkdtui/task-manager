@@ -72,7 +72,7 @@ class TaskRepository:
     def get_all_tasks(self) -> list[Task]:
         cursor = self.connection.cursor()
         try:
-            cursor.execute("SELECT id, title, description, is_completed FROM tasks")
+            cursor.execute("SELECT id, title, description, is_completed FROM tasks ORDER BY id")
             tasks = [
                 Task(task[0], task[1], task[2], bool(task[3]))
                 for task in cursor.fetchall()

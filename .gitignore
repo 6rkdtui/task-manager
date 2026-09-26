@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-task_manager.db
+*.db
