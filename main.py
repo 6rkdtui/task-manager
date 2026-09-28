@@ -12,7 +12,7 @@ def get_id() -> int:
 
 
 if __name__ == "__main__":
-    repository = TaskRepository("task_manager.db")
+    repository = TaskRepository()
     service = TaskService(repository)
 
     while True:

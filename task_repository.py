@@ -1,12 +1,11 @@
-import sqlite3
+from database import get_connection
 from task import Task
 
 
 class TaskRepository:
 
-    def __init__(self, db_name: str) -> None:
-        self.db_name = db_name
-        self.connection = sqlite3.connect(self.db_name)
+    def __init__(self) -> None:
+        self.connection = get_connection()
         self._create_table()
 
     def _create_table(self) -> None:
@@ -14,15 +13,15 @@ class TaskRepository:
         try:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS tasks (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
                     title TEXT NOT NULL, 
                     description TEXT, 
-                    is_completed BOOLEAN NOT NULL DEFAULT 0
+                    is_completed BOOLEAN NOT NULL DEFAULT FALSE
                 ) 
                 """)
 
             self.connection.commit()
-        except sqlite3.Error:
+        except Exception:
             self.connection.rollback()
             raise
         finally:
@@ -35,35 +34,35 @@ class TaskRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT id, title, description, is_completed FROM tasks WHERE id = ?",
+                "SELECT id, title, description, is_completed FROM tasks WHERE id = %s",
                 (task_id,),
             )
-            task = cursor.fetchone()
+            row = cursor.fetchone()
         finally:
             cursor.close()
 
-        if task is None:
+        if row is None:
             return None
 
-        return Task(task[0], task[1], task[2], bool(task[3]))
+        return Task(row[0], row[1], row[2], row[3])
 
     def add_task(self, title: str, description: str) -> Task:
         cursor = self.connection.cursor()
 
         try:
             cursor.execute(
-                "INSERT INTO tasks (title, description) VALUES (?, ?)",
+                "INSERT INTO tasks (title, description) VALUES (%s, %s) RETURNING id",
                 (title, description),
             )
+            row = cursor.fetchone()
 
-            new_id = cursor.lastrowid
-            if new_id is None:
+            if row is None:
                 raise RuntimeError("Не удалось получить ID новой задачи")
 
             self.connection.commit()
 
-            return Task(new_id, title, description)
-        except sqlite3.Error:
+            return Task(row[0], title, description)
+        except Exception:
             self.connection.rollback()
             raise
         finally:
@@ -72,15 +71,14 @@ class TaskRepository:
     def get_all_tasks(self) -> list[Task]:
         cursor = self.connection.cursor()
         try:
-            cursor.execute("SELECT id, title, description, is_completed FROM tasks ORDER BY id")
-            tasks = [
-                Task(task[0], task[1], task[2], bool(task[3]))
-                for task in cursor.fetchall()
-            ]
+            cursor.execute(
+                "SELECT id, title, description, is_completed FROM tasks ORDER BY id"
+            )
+            rows = [Task(row[0], row[1], row[2], row[3]) for row in cursor.fetchall()]
         finally:
             cursor.close()
 
-        return tasks
+        return rows
 
     def complete_task(self, task_id: int) -> Task | None:
         task = self.get_task(task_id)
@@ -90,9 +88,12 @@ class TaskRepository:
 
         cursor = self.connection.cursor()
         try:
-            cursor.execute("UPDATE tasks SET is_completed = 1 WHERE id = ?", (task_id,))
+            cursor.execute(
+                "UPDATE tasks SET is_completed = TRUE WHERE id = %s",
+                (task_id,),
+            )
             self.connection.commit()
-        except sqlite3.Error:
+        except Exception:
             self.connection.rollback()
             raise
         finally:
@@ -108,9 +109,9 @@ class TaskRepository:
 
         cursor = self.connection.cursor()
         try:
-            cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+            cursor.execute("DELETE FROM tasks WHERE id = %s", (task_id,))
             self.connection.commit()
-        except sqlite3.Error:
+        except Exception:
             self.connection.rollback()
             raise
         finally:
@@ -130,17 +131,17 @@ class TaskRepository:
         try:
             if title is not None:
                 cursor.execute(
-                    "UPDATE tasks SET title = ? WHERE id = ?", (title, task_id)
+                    "UPDATE tasks SET title = %s WHERE id = %s", (title, task_id)
                 )
 
             if description is not None:
                 cursor.execute(
-                    "UPDATE tasks SET description = ? WHERE id = ?",
+                    "UPDATE tasks SET description = %s WHERE id = %s",
                     (description, task_id),
                 )
 
             self.connection.commit()
-        except sqlite3.Error:
+        except Exception:
             self.connection.rollback()
             raise
         finally:

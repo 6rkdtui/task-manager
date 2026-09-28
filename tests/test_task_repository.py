@@ -1,14 +1,26 @@
 import pytest
+from dotenv import load_dotenv
+
 from task_repository import TaskRepository
 
 
 @pytest.fixture
-def repository(tmp_path):
-    db_path = tmp_path / "test_task_manager.db"
+def repository():
+    load_dotenv(".env.test", override=True)
 
-    repo = TaskRepository(str(db_path))
+    repo = TaskRepository()
+
+    cursor = repo.connection.cursor()
+    cursor.execute("DELETE FROM tasks")
+    repo.connection.commit()
+    cursor.close()
 
     yield repo
+
+    cursor = repo.connection.cursor()
+    cursor.execute("DELETE FROM tasks")
+    repo.connection.commit()
+    cursor.close()
 
     repo.close()
 
