@@ -1,13 +1,18 @@
-import pytest
+import pytest, os
 from dotenv import load_dotenv
+
 
 from task_repository import TaskRepository
 
 
 @pytest.fixture
 def repository():
-    load_dotenv(".env.test", override=True)
+    flag_loading = load_dotenv(".env.test", override=True)
+    if flag_loading is False:
+        raise RuntimeError("Не удалось загрузить '.env.test'")
 
+    if os.getenv("DB_NAME") != "task_manager_test":
+        raise RuntimeError("Тесты должны использовать базу task_manager_test")
     repo = TaskRepository()
 
     cursor = repo.connection.cursor()
