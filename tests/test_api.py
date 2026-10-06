@@ -59,3 +59,116 @@ def test_create_task_without_title():
 
     finally:
         app.dependency_overrides.pop(get_service, None)
+
+
+def test_get_task():
+    fake_service = Mock(spec=TaskService)
+
+    fake_service.get_task.return_value = Task(
+        id=1, title="Купить продукты", description="Молоко и хлеб", is_completed=True
+    )
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.get("/tasks/1")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": 1,
+            "title": "Купить продукты",
+            "description": "Молоко и хлеб",
+            "is_completed": True,
+        }
+        fake_service.get_task.assert_called_once_with(1)
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
+
+
+def test_get_task_not_found():
+    fake_service = Mock(spec=TaskService)
+
+    fake_service.get_task.return_value = None
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.get("/tasks/1")
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Задача не найдена"}
+        fake_service.get_task.assert_called_once_with(1)
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
+
+
+def test_get_all_tasks():
+    fake_service = Mock(spec=TaskService)
+
+    fake_service.get_all_tasks.return_value = [
+        Task(
+            id=1,
+            title="Купить продукты",
+            description="Молоко и хлеб",
+            is_completed=True,
+        ),
+        Task(
+            id=2,
+            title="Убраться дома",
+            description="Пропылесосить и помыть полы",
+            is_completed=False,
+        ),
+    ]
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.get("/tasks")
+
+        assert response.status_code == 200
+        assert response.json() == [
+            {
+                "id": 1,
+                "title": "Купить продукты",
+                "description": "Молоко и хлеб",
+                "is_completed": True,
+            },
+            {
+                "id": 2,
+                "title": "Убраться дома",
+                "description": "Пропылесосить и помыть полы",
+                "is_completed": False,
+            },
+        ]
+        fake_service.get_all_tasks.assert_called_once_with()
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
+
+
+def test_get_all_tasks_without_tasks():
+    fake_service = Mock(spec=TaskService)
+
+    fake_service.get_all_tasks.return_value = []
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.get("/tasks")
+
+        assert response.status_code == 200
+        assert response.json() == []
+        fake_service.get_all_tasks.assert_called_once_with()
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
