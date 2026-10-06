@@ -11,3 +11,8 @@ class TaskResponse(BaseModel):
     title: str
     description: str
     is_completed: bool
+
+
+class TaskUpdate(BaseModel):
+    title: str
+    description: str
