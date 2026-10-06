@@ -1,5 +1,7 @@
 from task_repository import TaskRepository
 from task_service import TaskService
+from database import get_connection
+from create_table import create_tasks_table
 
 
 def get_id() -> int:
@@ -12,6 +14,12 @@ def get_id() -> int:
 
 
 if __name__ == "__main__":
+    connection = get_connection()
+    try:
+        create_tasks_table(connection)
+    finally:
+        connection.close()
+
     repository = TaskRepository()
     service = TaskService(repository)
 

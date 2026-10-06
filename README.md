@@ -1,6 +1,6 @@
 # Task Manager
 
-Данный проект представляет собой консольное приложение для управления задачами.
+Task Manager — учебное приложение для управления задачами с двумя интерфейсами: консольным (CLI) и REST API на FastAPI.
 
 Учебный проект создан для закрепления знаний Python, ООП, работы с базами данных, архитектуры приложений и автоматического тестирования.
 
@@ -27,6 +27,9 @@
 - python-dotenv
 - pytest
 - unittest.mock
+- FastAPI
+- Pydantic
+- Uvicorn
 
 ## Структура проекта
 
@@ -38,10 +41,13 @@ Task_manager/
 ├── task.py
 ├── tests/
 │   ├── test_task_repository.py
-│   └── test_task_service.py
+│   ├── test_task_service.py
+│   └── test_api.py
 ├── requirements.txt
 ├── database.py
-├── create_tables.py
+├── create_table.py
+├── api.py
+├── schemas.py
 ├── README.md
 ├── .gitignore
 ├── .env
@@ -52,25 +58,19 @@ Task_manager/
 
 ## Архитектура
 
-Проект разделён на несколько слоёв:
+У проекта два интерфейса: консольное меню (`main.py`) и REST API (`api.py`).
+Оба используют один и тот же сервис и репозиторий:
 
-```text
-main.py
-↓
-TaskService
-↓
-TaskRepository
-↓
-PostgreSQL
-```
+| Слой | Ответственность |
+| --- | --- |
+| `main.py` и `api.py` | Получают ввод пользователя или HTTP-запрос и возвращают результат |
+| `TaskService` | Содержит логику работы с задачами |
+| `TaskRepository` | Выполняет SQL-запросы к PostgreSQL |
+| `Task` | Представляет задачу внутри приложения |
 
-- `main.py` — консольный интерфейс;
-- `TaskService` — бизнес-логика приложения;
-- `TaskRepository` — работа с базой данных;
-- `Task` — модель задачи;
-- `database.py` — конфигурация подключения к PostgreSQL.
-
-Такое разделение позволяет отделить пользовательский интерфейс и бизнес-логику от конкретной реализации хранения данных.
+Подключение к PostgreSQL создаётся через `database.py`. Таблица `tasks`
+подготавливается при запуске CLI или API, а для тестов — в тестовой фикстуре.
+`TaskRepository` работает с уже подготовленной таблицей.
 
 ## PostgreSQL
 
@@ -119,7 +119,8 @@ is_completed
 - работа с несуществующими задачами;
 - получение пустого списка;
 - бизнес-логика `TaskService`;
-- взаимодействие `TaskService` с Repository через mock-объекты.
+- взаимодействие `TaskService` с Repository через mock-объекты;
+- HTTP-эндпоинты API с помощью `TestClient` и подмены `TaskService` через `dependency_overrides`.
 
 ### Тестирование TaskRepository
 
@@ -149,37 +150,40 @@ Mock(spec=TaskRepository)
 
 Запуск всех тестов:
 
-```bash
+```powershell
 python -m pytest -v
 ```
 
 ## Установка и запуск
 
-Создать виртуальное окружение:
+Создать и активировать виртуальное окружение:
 
-```bash
+```powershell
 python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
 Установить зависимости:
 
-```bash
+```powershell
 python -m pip install -r requirements.txt
 ```
 
-Создать PostgreSQL-базу и настроить .env.
+Создать базу PostgreSQL `task_manager` и указать параметры подключения в `.env`. Таблица `tasks` будет создана автоматически при запуске приложения, если её ещё нет.
 
-Создать таблицу:
+Для запуска консольного приложения:
 
-```bash
-python create_tables.py
-```
-
-Запустить приложение:
-
-```bash
+```powershell
 python main.py
 ```
+
+Для запуска API:
+
+```powershell
+python -m uvicorn api:app --reload
+```
+
+После запуска API документация доступна по адресу [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
 ## Планы развития
 
@@ -194,5 +198,13 @@ python main.py
 
 ## Статус проекта
 
-Версия 0.7.
-Проект переведён с SQLite на PostgreSQL. Реализовано подключение через psycopg, конфигурация через переменные окружения, отдельная тестовая PostgreSQL-база и автоматические тесты для Repository и Service слоёв.
+Версия 0.8 в разработке.
+
+Проект поддерживает консольный интерфейс и REST API на FastAPI.
+Через API можно создать задачу, получить список или отдельную задачу,
+изменить её, отметить выполненной и удалить. Оба интерфейса используют
+общие слои `TaskService` и `TaskRepository` с PostgreSQL.
+
+Таблица `tasks` подготавливается при запуске приложения. Для API,
+Service и Repository написаны автоматические тесты; тесты Repository
+используют отдельную PostgreSQL-базу.

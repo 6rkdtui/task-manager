@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 
 from task_repository import TaskRepository
+from create_table import create_tasks_table
 
 
 @pytest.fixture
@@ -14,6 +15,7 @@ def repository():
     if os.getenv("DB_NAME") != "task_manager_test":
         raise RuntimeError("Тесты должны использовать базу task_manager_test")
     repo = TaskRepository()
+    create_tasks_table(repo.connection)
 
     cursor = repo.connection.cursor()
     cursor.execute("DELETE FROM tasks")

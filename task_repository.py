@@ -6,26 +6,6 @@ class TaskRepository:
 
     def __init__(self) -> None:
         self.connection = get_connection()
-        self._create_table()
-
-    def _create_table(self) -> None:
-        cursor = self.connection.cursor()
-        try:
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS tasks (
-                    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-                    title TEXT NOT NULL, 
-                    description TEXT, 
-                    is_completed BOOLEAN NOT NULL DEFAULT FALSE
-                ) 
-                """)
-
-            self.connection.commit()
-        except Exception:
-            self.connection.rollback()
-            raise
-        finally:
-            cursor.close()
 
     def close(self) -> None:
         self.connection.close()

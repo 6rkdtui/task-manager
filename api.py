@@ -1,10 +1,25 @@
 from fastapi import FastAPI, Depends, HTTPException
+from contextlib import asynccontextmanager
 
 from task_repository import TaskRepository
 from task_service import TaskService
 from schemas import TaskCreate, TaskResponse, TaskUpdate
+from create_table import create_tasks_table
+from database import get_connection
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    connection = get_connection()
+    try:
+        create_tasks_table(connection)
+    finally:
+        connection.close()
+
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 def get_service():
