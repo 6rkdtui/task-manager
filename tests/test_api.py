@@ -22,7 +22,7 @@ def test_create_task():
 
         response = client.post(
             "/tasks",
-            json={"title": "Купить продукты", "description": "Молоко и хлеб"},
+            json={"title": " Купить продукты ", "description": "Молоко и хлеб"},
         )
 
         assert response.status_code == 201
@@ -55,6 +55,48 @@ def test_create_task_without_title():
 
         assert response.status_code == 422
         assert response.json()["detail"][0]["loc"] == ["body", "title"]
+        fake_service.add_task.assert_not_called()
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
+
+
+def test_create_task_title_only_spaces():
+    fake_service = Mock(spec=TaskService)
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.post(
+            "/tasks",
+            json={"title": "   ", "description": "Молоко и хлеб"},
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"][0]["loc"] == ["body", "title"]
+        fake_service.add_task.assert_not_called()
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
+
+
+def test_create_task_description_only_spaces():
+    fake_service = Mock(spec=TaskService)
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.post(
+            "/tasks",
+            json={"title": "Купить продукты", "description": "   "},
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"][0]["loc"] == ["body", "description"]
         fake_service.add_task.assert_not_called()
 
     finally:
@@ -252,6 +294,54 @@ def test_update_task_without_description():
             "/tasks/1",
             json={
                 "title": "Купить продукты",
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"][0]["loc"] == ["body", "description"]
+        fake_service.update_task.assert_not_called()
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
+
+
+def test_update_task_title_only_spaces():
+    fake_service = Mock(spec=TaskService)
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.put(
+            "/tasks/1",
+            json={
+                "title": "   ",
+                "description": "Молоко и хлеб",
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"][0]["loc"] == ["body", "title"]
+        fake_service.update_task.assert_not_called()
+
+    finally:
+        app.dependency_overrides.pop(get_service, None)
+
+
+def test_update_task_description_only_spaces():
+    fake_service = Mock(spec=TaskService)
+
+    app.dependency_overrides[get_service] = lambda: fake_service
+
+    try:
+        client = TestClient(app)
+
+        response = client.put(
+            "/tasks/1",
+            json={
+                "title": "Купить продукты",
+                "description": "   ",
             },
         )
 

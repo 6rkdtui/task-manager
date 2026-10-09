@@ -1,9 +1,12 @@
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, StringConstraints
+
+NonBlankText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
 class TaskCreate(BaseModel):
-    title: str
-    description: str
+    title: NonBlankText
+    description: NonBlankText
 
 
 class TaskResponse(BaseModel):
@@ -14,5 +17,5 @@ class TaskResponse(BaseModel):
 
 
 class TaskUpdate(BaseModel):
-    title: str
-    description: str
+    title: NonBlankText
+    description: NonBlankText

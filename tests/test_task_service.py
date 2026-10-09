@@ -29,6 +29,20 @@ def test_get_task(service, mock_repository):
     mock_repository.get_task.assert_called_once_with(1)
 
 
+def test_add_task_title_only_spaces(service, mock_repository):
+    with pytest.raises(ValueError):
+        service.add_task("   ", "Описание")
+
+    mock_repository.add_task.assert_not_called()
+
+
+def test_add_task_description_only_spaces(service, mock_repository):
+    with pytest.raises(ValueError):
+        service.add_task("Названеи", "   ")
+
+    mock_repository.add_task.assert_not_called()
+
+
 def test_complete_task(service, mock_repository):
     task = Task(
         id=1,
@@ -141,6 +155,32 @@ def test_update_task_not_found(service, mock_repository):
 
     assert result is None
     mock_repository.get_task.assert_called_once_with(1)
+    mock_repository.update_task.assert_not_called()
+
+
+def test_update_task_title_only_spaces(service, mock_repository):
+    mock_repository.get_task.return_value = Task(
+        id=1,
+        title="Старое название",
+        description="Описание",
+    )
+
+    with pytest.raises(ValueError):
+        service.update_task(1, "   ", None)
+
+    mock_repository.update_task.assert_not_called()
+
+
+def test_update_task_description_only_spaces(service, mock_repository):
+    mock_repository.get_task.return_value = Task(
+        id=1,
+        title="Название",
+        description="Старое описание",
+    )
+
+    with pytest.raises(ValueError):
+        service.update_task(1, None, "   ")
+
     mock_repository.update_task.assert_not_called()
 
 

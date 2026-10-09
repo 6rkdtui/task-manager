@@ -50,8 +50,11 @@ if __name__ == "__main__":
             case 1:
                 title = input("Введите название задачи: ")
                 description = input("Введите описание задачи: ")
-                task = service.add_task(title, description)
-                print(task)
+                try:
+                    task = service.add_task(title, description)
+                    print(task)
+                except ValueError as exc:
+                    print(exc)
 
             case 2:
                 tasks = service.get_all_tasks()
@@ -86,11 +89,14 @@ if __name__ == "__main__":
                     )
                     new_description = None if new_description == "" else new_description
 
-                    updated_task = service.update_task(
-                        task_id, new_title, new_description
-                    )
+                    try:
+                        updated_task = service.update_task(
+                            task_id, new_title, new_description
+                        )
 
-                    print(updated_task)
+                        print(updated_task)
+                    except ValueError as exc:
+                        print(exc)
 
             case 5:
                 task_id = get_id()

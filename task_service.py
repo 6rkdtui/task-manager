@@ -41,9 +41,28 @@ class TaskService:
         if task is None:
             return None
 
+        if title is not None:
+            title = title.strip()
+            if not title:
+                raise ValueError("Название задачи не может быть пустым")
+
+        if description is not None:
+            description = description.strip()
+            if not description:
+                raise ValueError("Описание задачи не может быть пустым")
+
         return self.repository.update_task(task_id, title, description)
 
     def add_task(self, title: str, description: str) -> Task:
+        title = title.strip()
+        description = description.strip()
+
+        if not title:
+            raise ValueError("Название задачи не может быть пустым")
+
+        if not description:
+            raise ValueError("Описание задачи не может быть пустым")
+
         return self.repository.add_task(title, description)
 
     def close(self) -> None:
