@@ -42,6 +42,7 @@ Task_manager/
 ├── tests/
 │   ├── test_task_repository.py
 │   ├── test_task_service.py
+│   ├── test_api_integration.py
 │   └── test_api.py
 ├── requirements.txt
 ├── database.py
@@ -122,6 +123,8 @@ is_completed
 - взаимодействие `TaskService` с Repository через mock-объекты;
 - HTTP-эндпоинты API с помощью `TestClient` и подмены `TaskService` через `dependency_overrides`.
 
+Дополнительно сквозной API-тест проверяет создание и получение задачи через настоящий `TaskService`, `TaskRepository` и отдельную PostgreSQL-базу `task_manager_test`.
+
 ### Тестирование TaskRepository
 
 Тесты `TaskRepository` работают с отдельной PostgreSQL-базой:
@@ -192,13 +195,13 @@ python -m uvicorn api:app --reload
 3. ~~Добавить обработку ошибок и более надёжное управление ресурсами~~
 4. ~~Добавить тестирование~~
 5. ~~Перейти на PostgreSQL~~
-6. Реализовать REST API на FastAPI
+6. ~~Реализовать REST API на FastAPI~~
 7. Добавить пользователей и авторизацию
 8. Добавить Docker
 
 ## Статус проекта
 
-Версия 0.8 в разработке.
+Версия 0.8 завершена.
 
 Проект поддерживает консольный интерфейс и REST API на FastAPI.
 Через API можно создать задачу, получить список или отдельную задачу,
