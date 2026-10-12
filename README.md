@@ -30,6 +30,7 @@ Task Manager — учебное приложение для управления
 - FastAPI
 - Pydantic
 - Uvicorn
+- Docker
 
 ## Структура проекта
 
@@ -45,6 +46,9 @@ Task_manager/
 │   ├── test_api_integration.py
 │   └── test_api.py
 ├── requirements.txt
+├── test_connection.py
+├── Dockerfile
+├── .dockerignore
 ├── database.py
 ├── create_table.py
 ├── api.py
@@ -77,7 +81,7 @@ Task_manager/
 
 Начиная с версии 0.7, проект использует PostgreSQL вместо SQLite.
 Подключение выполняется через драйвер psycopg.
-Параметры подключения хранятся в .env:
+При локальном запуске параметры подключения читаются из .env; при запуске в контейнере они передаются через переменные окружения.
 
 ```env
 DB_HOST=127.0.0.1
@@ -208,8 +212,8 @@ docker build -t task-manager:0.8 .
 4. ~~Добавить тестирование~~
 5. ~~Перейти на PostgreSQL~~
 6. ~~Реализовать REST API на FastAPI~~
-7. Добавить пользователей и авторизацию
-8. Добавить Docker
+7. Добавить Docker
+8. Добавить пользователей и авторизацию
 
 ## Статус проекта
 
