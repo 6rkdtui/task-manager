@@ -30,33 +30,34 @@ Task Manager — учебное приложение для управления
 - FastAPI
 - Pydantic
 - Uvicorn
-- Docker
+- Docker и Docker Compose
 
 ## Структура проекта
 
 ```text
 Task_manager/
 ├── main.py
-├── task_repository.py
-├── task_service.py
-├── task.py
-├── tests/
-│   ├── test_task_repository.py
-│   ├── test_task_service.py
-│   ├── test_api_integration.py
-│   └── test_api.py
-├── requirements.txt
-├── test_connection.py
-├── Dockerfile
-├── .dockerignore
-├── database.py
-├── create_table.py
 ├── api.py
 ├── schemas.py
+├── task.py
+├── task_service.py
+├── task_repository.py
+├── database.py
+├── create_table.py
+├── test_connection.py
+├── Dockerfile
+├── compose.yaml
+├── .dockerignore
+├── requirements.txt
 ├── README.md
 ├── .gitignore
 ├── .env
-└── .env.test
+├── .env.test
+└── tests/
+    ├── test_task_repository.py
+    ├── test_task_service.py
+    ├── test_api_integration.py
+    └── test_api.py
 ```
 
 Файлы `.env` и `.env.test` содержат локальную конфигурацию и не добавляются в Git.
@@ -200,9 +201,25 @@ python -m uvicorn api:app --reload
 docker build -t task-manager:0.8 .
 ```
 
-Для запуска API необходима доступная база PostgreSQL. Параметры подключения передаются контейнеру при запуске через переменные окружения `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` и `DB_PASSWORD`.
+Для запуска API вместе с PostgreSQL используется Docker Compose. Перед запуском создайте локальный `.env` с параметрами подключения к базе, описанными в разделе «PostgreSQL». Compose использует значения `DB_NAME`, `DB_USER` и `DB_PASSWORD` для обоих сервисов. Внутри контейнера API адрес базы задаётся как `DB_HOST=db`.
 
-Локальные файлы `.env` и `.env.test` исключены из сборки с помощью `.dockerignore` и не входят в образ.
+Собрать и запустить сервисы:
+
+```bash
+docker compose up --build -d
+```
+
+После запуска документация API доступна по адресу `http://127.0.0.1:8000/docs` на машине, где работает Docker.
+
+Остановить сервисы:
+
+```bash
+docker compose down
+```
+
+Эта команда удаляет контейнеры и сеть проекта, но сохраняет задачи в именованном томе PostgreSQL.
+
+Локальные `.env` и `.env.test` исключены из образа через `.dockerignore`. Compose читает `.env` на машине запуска и передаёт нужные значения контейнерам.
 
 ## Планы развития
 
@@ -212,7 +229,7 @@ docker build -t task-manager:0.8 .
 4. ~~Добавить тестирование~~
 5. ~~Перейти на PostgreSQL~~
 6. ~~Реализовать REST API на FastAPI~~
-7. Добавить Docker
+7. ~~Добавить Docker~~
 8. Добавить пользователей и авторизацию
 
 ## Статус проекта
